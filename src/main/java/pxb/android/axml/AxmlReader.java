@@ -17,7 +17,6 @@ package pxb.android.axml;
 
 import com.googlecode.dex2jar.reader.io.ArrayDataIn;
 import com.googlecode.dex2jar.reader.io.DataIn;
-import pxb.android.axml.AxmlVisitor.NodeVisitor;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -124,7 +123,7 @@ public class AxmlReader {
                     nodeVisitorStack.push(stackTop);
                     nodeVisitorContentsHandled.push(false);
                     stackTop.visitBegin();
-                    stackTop.visitLine(lineNumber);
+                    stackTop.visitLineNumber(lineNumber);
                 }
 
                 int attributeCount = input.readUShortx();

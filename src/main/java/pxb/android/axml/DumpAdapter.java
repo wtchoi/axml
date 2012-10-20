@@ -127,6 +127,14 @@ public class DumpAdapter extends AxmlVisitor {
         }
 
         @Override
+        public void visitLineNumber(int n){
+            writer.println();
+            indentContent();
+            writer.print("L"+n);
+            super.visitLineNumber(n);
+        }
+
+        @Override
         public void visitEnd(){
             indent();
             writer.println("</"+name+">");
@@ -149,16 +157,25 @@ public class DumpAdapter extends AxmlVisitor {
     private PrintWriter writer = null;
 
     public DumpAdapter() {
-        writer = new PrintWriter(System.out);
+        setupWriter(null);
     }
 
     public DumpAdapter(Writer w) {
-        writer = new PrintWriter(w);
+        setupWriter(w);
     }
 
     public DumpAdapter(Writer w, AxmlVisitor av) {
         super(av);
-        writer = new PrintWriter(w);
+        setupWriter(w);
+    }
+
+    private void setupWriter(Writer w){
+        if(w == null){
+            writer = new PrintWriter(System.out, true);
+        }
+        else{
+            writer = new PrintWriter(w);
+        }
     }
 
     @Override

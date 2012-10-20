@@ -48,20 +48,22 @@ public class Axml extends AxmlVisitor {
 
         public void accept(NodeVisitor nodeVisitor) {
             NodeVisitor nodeVisitor2 = nodeVisitor.visitChild(ns, name);
+            nodeVisitor2.visitBegin();
             acceptB(nodeVisitor2);
             nodeVisitor2.visitEnd();
         }
 
         public void acceptB(NodeVisitor nodeVisitor) {
-            if (text != null) {
-                text.accept(nodeVisitor);
+            if (ln != null) {
+                nodeVisitor.visitLineNumber(ln);
             }
             for (Attr a : attrs) {
                 a.accept(nodeVisitor);
             }
-            if (ln != null) {
-                nodeVisitor.visitLine(ln);
+            if (text != null) {
+                text.accept(nodeVisitor);
             }
+            nodeVisitor.visitContentEnd();
             for (Node c : children) {
                 c.accept(nodeVisitor);
             }
@@ -88,7 +90,7 @@ public class Axml extends AxmlVisitor {
         }
 
         @Override
-        public void visitLine(int ln) {
+        public void visitLineNumber(int ln) {
             this.ln = ln;
         }
 
@@ -114,6 +116,8 @@ public class Axml extends AxmlVisitor {
     public List<Ns> nses = new ArrayList<Ns>();
 
     public void accept(final AxmlVisitor visitor) {
+        visitor.visitBegin();
+
         for (Ns ns : nses) {
             ns.accept(visitor);
         }
@@ -126,6 +130,7 @@ public class Axml extends AxmlVisitor {
                 }
             });
         }
+        visitor.visitEnd();
     }
 
     @Override

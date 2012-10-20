@@ -97,7 +97,7 @@ public class AxmlWriter extends AxmlVisitor {
         }
 
         @Override
-        public void visitLine(int ln) {
+        public void visitLineNumber(int ln) {
             this.line = ln;
         }
 
