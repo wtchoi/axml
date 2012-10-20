@@ -1,14 +1,16 @@
 package pxb.android.axml.test;
 
-import com.googlecode.dex2jar.reader.io.ArrayDataIn;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+
 import org.junit.Test;
+
 import pxb.android.axml.AxmlReader;
 import pxb.android.axml.AxmlVisitor;
 import pxb.android.axml.DumpAdapter;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import com.googlecode.dex2jar.reader.io.ArrayDataIn;
 
 public class Test3 {
     @Test

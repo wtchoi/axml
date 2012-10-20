@@ -1,6 +1,7 @@
 package pxb.android.axml.test;
 
 import com.googlecode.dex2jar.reader.io.ArrayDataIn;
+import junit.framework.Assert;
 import org.junit.Test;
 import pxb.android.axml.AxmlReader;
 import pxb.android.axml.AxmlWriter;
@@ -9,6 +10,7 @@ import pxb.android.axml.DumpAdapter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.StringWriter;
 
 public class Test2 {
     @Test
@@ -24,9 +26,15 @@ public class Test2 {
                 AxmlWriter wr = new AxmlWriter();
                 System.out.println("=== A ");
                 //rd.accept(new DumpAdapter());
-                rd.accept(new DumpAdapter(wr));
+                StringWriter writerA = new StringWriter();
+                rd.accept(new DumpAdapter(writerA, wr));
+
                 System.out.println("=== B ");
-                new AxmlReader(ArrayDataIn.le(wr.toByteArray())).accept(new DumpAdapter());
+                StringWriter writerB = new StringWriter();
+                new AxmlReader(ArrayDataIn.le(wr.toByteArray())).accept(new DumpAdapter(writerB));
+
+                Assert.assertTrue(writerA.toString().compareTo(writerA.toString()) == 0);
+
             }
         }
     }

@@ -15,6 +15,8 @@
  */
 package pxb.android.axml;
 
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,69 +39,72 @@ public class DumpAdapter extends AxmlVisitor {
         protected Map<String, String> nses;
         protected String namespace;
         protected String name;
+        protected PrintWriter writer;
 
-        public DumpNodeAdapter(NodeVisitor nv, String namespace, String name) {
+        public DumpNodeAdapter(PrintWriter w, NodeVisitor nv, String namespace, String name) {
             super(nv);
             this.depth = 0;
             this.nses = null;
             this.namespace = namespace;
             this.name = name;
+            this.writer = w;
         }
 
-        public DumpNodeAdapter(NodeVisitor nv, int x, Map<String, String> nses, String namespace, String name) {
+        public DumpNodeAdapter(PrintWriter w, NodeVisitor nv, int x, Map<String, String> nses, String namespace, String name) {
             super(nv);
             this.depth = x;
             this.nses = nses;
             this.namespace = namespace;
             this.name = name;
+            this.writer = w;
         }
 
         @Override
         public void visitBegin(){
             indent();
-            System.out.print("<");
+            writer.print("<");
             if (namespace != null) {
-                System.out.println(getPrefix(namespace) + ":");
+                writer.println(getPrefix(namespace) + ":");
             }
-            System.out.print(name);
+            writer.print(name);
             super.visitBegin();
         }
 
 
         @Override
         public void visitContentAttr(String ns, String name, int resourceId, int type, Object obj) {
-            System.out.println();
+            writer.println();
 
             indentContent();
             if (ns != null) {
-                System.out.print(String.format("%s:", getPrefix(ns)));
+                writer.print(String.format("%s:", getPrefix(ns)));
             }
-            System.out.print(name);
+            writer.print(name);
             if (resourceId != -1) {
-                System.out.print(String.format("(%08x)", resourceId));
+                writer.print(String.format("(%08x)", resourceId));
             }
             if (obj instanceof String) {
-                System.out.print(String.format("=[%08x]\"%s\"", type, obj));
+                writer.print(String.format("=[%08x]\"%s\"", type, obj));
             } else if (obj instanceof Boolean) {
-                System.out.print(String.format("=[%08x]\"%b\"", type, obj));
+                writer.print(String.format("=[%08x]\"%b\"", type, obj));
             } else {
-                System.out.print(String.format("=[%08x]%08x", type, obj));
+                writer.print(String.format("=[%08x]%08x", type, obj));
             }
 
-            //System.out.println();
+            //writer.println();
             super.visitContentAttr(ns, name, resourceId, type, obj);
         }
 
         @Override
         public void visitContentEnd(){
-            System.out.println(">");
+            writer.println(">");
             super.visitContentEnd();
         }
 
         @Override
         public NodeVisitor visitChild(String namespace, String name) {
             NodeVisitor nv = super.visitChild(namespace, name);
-            return new DumpNodeAdapter(nv, depth + 1, nses, namespace, name);
+            return new DumpNodeAdapter(writer, nv, depth + 1, nses, namespace, name);
         }
 
         protected String getPrefix(String uri) {
@@ -114,44 +119,51 @@ public class DumpAdapter extends AxmlVisitor {
 
         @Override
         public void visitContentText(int ln, String value) {
-            System.out.println();
+            writer.println();
 
             indentContent();
-            System.out.print(value);
+            writer.print(value);
             super.visitContentText(ln, value);
         }
 
         @Override
         public void visitEnd(){
             indent();
-            System.out.println("</"+name+">");
+            writer.println("</"+name+">");
             super.visitEnd();
         }
 
         private void indent(){
             for (int i = 0; i < depth; i++) {
-                System.out.print("  ");
+                writer.print("  ");
             }
         }
 
         private void indentContent(){
             indent();
-            System.out.print("  ");
+            writer.print("  ");
         }
     }
 
     private Map<String, String> nses = new HashMap<String, String>();
+    private PrintWriter writer = null;
 
     public DumpAdapter() {
+        writer = new PrintWriter(System.out);
     }
 
-    public DumpAdapter(AxmlVisitor av) {
+    public DumpAdapter(Writer w) {
+        writer = new PrintWriter(w);
+    }
+
+    public DumpAdapter(Writer w, AxmlVisitor av) {
         super(av);
+        writer = new PrintWriter(w);
     }
 
     @Override
     public void visitBegin(){
-        System.out.println("<xml document>");
+        writer.println("<xml document>");
         super.visitBegin();
     }
 
@@ -159,7 +171,7 @@ public class DumpAdapter extends AxmlVisitor {
     public NodeVisitor visitFirst(String namespace, String name) {
         NodeVisitor nv = super.visitFirst(namespace, name);
         //if (nv != null) {
-            DumpNodeAdapter x = new DumpNodeAdapter(nv, 1, nses, namespace, name);
+            DumpNodeAdapter x = new DumpNodeAdapter(writer, nv, 1, nses, namespace, name);
             return x;
         //}
         //else{
@@ -170,14 +182,14 @@ public class DumpAdapter extends AxmlVisitor {
 
     @Override
     public void visitNamespace(String prefix, String uri, int ln) {
-        System.out.println("xmlns:" + prefix + "=" + uri);
+        writer.println("xmlns:" + prefix + "=" + uri);
         this.nses.put(uri, prefix);
         super.visitNamespace(prefix, uri, ln);
     }
 
     @Override
     public void visitEnd(){
-        System.out.println("</xml document>");
+        writer.println("</xml document>");
         super.visitEnd();
     }
 
