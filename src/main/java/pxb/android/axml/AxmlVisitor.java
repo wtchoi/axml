@@ -15,6 +15,11 @@
  */
 package pxb.android.axml;
 
+/*
+    AXMLVisitor visiting sequence : visitBegin [visitNamespace]* visitFirstNode visitEnd
+    NodeVisitor visiting sequence : visitBegin [visitContentAttr | visitContentText]* visitContentEnd visitChildNoe visitEnd
+ */
+
 /**
  * visitor to visit an axml
  * 
@@ -23,7 +28,7 @@ package pxb.android.axml;
  */
 public class AxmlVisitor {
 
-    public static abstract class NodeVisitor {
+    public static class NodeVisitor {
         protected NodeVisitor nv;
 
         public NodeVisitor() {
@@ -33,6 +38,12 @@ public class AxmlVisitor {
         public NodeVisitor(NodeVisitor nv) {
             super();
             this.nv = nv;
+        }
+
+        public void visitBegin(){
+            if( nv != null ){
+                nv.visitBegin();
+            }
         }
 
         /**
@@ -46,9 +57,15 @@ public class AxmlVisitor {
          * @param obj
          *            a string for {@link AxmlVisitor#TYPE_STRING} ,and Integer for others
          */
-        public void visitAttr(String ns, String name, int resourceId, int type, Object obj) {
+        public void visitContentAttr(String ns, String name, int resourceId, int type, Object obj) {
             if (nv != null) {
-                nv.visitAttr(ns, name, resourceId, type, obj);
+                nv.visitContentAttr(ns, name, resourceId, type, obj);
+            }
+        }
+
+        public void visitContentEnd(){
+            if(nv != null){
+                nv.visitContentEnd();
             }
         }
 
@@ -91,9 +108,9 @@ public class AxmlVisitor {
          * 
          * @param value
          */
-        public void visitText(int lineNumber, String value) {
+        public void visitContentText(int lineNumber, String value) {
             if (nv != null) {
-                nv.visitText(lineNumber, value);
+                nv.visitContentText(lineNumber, value);
             }
         }
     }
@@ -116,6 +133,12 @@ public class AxmlVisitor {
         this.av = av;
     };
 
+    public void visitBegin(){
+        if (av != null){
+            av.visitBegin();
+        }
+    }
+
     /**
      * end the visit
      */
@@ -128,19 +151,19 @@ public class AxmlVisitor {
     /**
      * create the first node
      * 
-     * @param ns
+     * @param namespace
      * @param name
      * @return
      */
-    public NodeVisitor visitFirst(String ns, String name) {
+    public NodeVisitor visitFirst(String namespace, String name) {
         if (av != null) {
-            return av.visitFirst(ns, name);
+            return av.visitFirst(namespace, name);
         }
         return null;
     }
 
     /**
-     * create a ns
+     * create a namespace
      * 
      * @param prefix
      * @param uri

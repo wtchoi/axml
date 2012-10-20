@@ -27,7 +27,7 @@ public class Axml extends AxmlVisitor {
             public Object value;
 
             public void accept(NodeVisitor nodeVisitor) {
-                nodeVisitor.visitAttr(ns, name, resourceId, type, value);
+                nodeVisitor.visitContentAttr(ns, name, resourceId, type, value);
             }
         }
 
@@ -36,7 +36,7 @@ public class Axml extends AxmlVisitor {
             public String text;
 
             public void accept(NodeVisitor nodeVisitor) {
-                nodeVisitor.visitText(ln, text);
+                nodeVisitor.visitContentText(ln, text);
             }
         }
 
@@ -68,7 +68,7 @@ public class Axml extends AxmlVisitor {
         }
 
         @Override
-        public void visitAttr(String ns, String name, int resourceId, int type, Object obj) {
+        public void visitContentAttr(String ns, String name, int resourceId, int type, Object obj) {
             Attr attr = new Attr();
             attr.name = name;
             attr.ns = ns;
@@ -93,7 +93,7 @@ public class Axml extends AxmlVisitor {
         }
 
         @Override
-        public void visitText(int lineNumber, String value) {
+        public void visitContentText(int lineNumber, String value) {
             Text text = new Text();
             text.ln = lineNumber;
             text.text = value;

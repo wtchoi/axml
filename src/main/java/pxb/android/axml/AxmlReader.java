@@ -80,13 +80,19 @@ public class AxmlReader {
             }
         };
 
-        NodeVisitor stackTop = rootVisitor;
+        NodeVisitor stackTop;
         Stack<NodeVisitor> nodeVisitorStack = new Stack<NodeVisitor>();
-        nodeVisitorStack.push(rootVisitor);
+        Stack<Boolean> nodeVisitorContentsHandled = new Stack<Boolean>();
 
         String name, namespace;
         int nameIdx, namespaceIdx;
         int lineNumber;
+
+        stackTop = rootVisitor;
+        nodeVisitorStack.push(rootVisitor);
+        nodeVisitorContentsHandled.push(false);
+
+        documentVisitor.visitBegin();
 
         for (int position = input.getCurrentPosition(); position < fileSize; position = input.getCurrentPosition()) {
             int type = input.readIntx();
@@ -105,11 +111,19 @@ public class AxmlReader {
                     name = stringItems.get(nameIdx).data;
                     namespace = namespaceIdx >= 0 ? stringItems.get(namespaceIdx).data : null;
 
+                    if(!nodeVisitorContentsHandled.peek()){
+                        nodeVisitorContentsHandled.pop();
+                        nodeVisitorContentsHandled.push(true);
+                        stackTop.visitContentEnd();
+                    }
+
                     stackTop = stackTop.visitChild(namespace, name);
                     if (stackTop == null) {
                         stackTop = EMPTY_VISITOR;
                     }
                     nodeVisitorStack.push(stackTop);
+                    nodeVisitorContentsHandled.push(false);
+                    stackTop.visitBegin();
                     stackTop.visitLine(lineNumber);
                 }
 
@@ -139,7 +153,7 @@ public class AxmlReader {
                             value = aValue;
                         }
                         int resourceId = nameIdx < resourceIds.size() ? resourceIds.get(nameIdx) : -1;
-                        stackTop.visitAttr(namespace, name, resourceId, aValueType, value);
+                        stackTop.visitContentAttr(namespace, name, resourceId, aValueType, value);
                     }
                 } else {
                     input.skip(5 * 4);
@@ -148,7 +162,14 @@ public class AxmlReader {
                 break;
             case CHUNK_XML_END_TAG: {
                 input.skip(size - 8);
+
+                if(!nodeVisitorContentsHandled.peek()){
+                    stackTop.visitContentEnd();
+                    nodeVisitorContentsHandled.pop();
+                    nodeVisitorContentsHandled.push(true);
+                }
                 stackTop.visitEnd();
+
                 nodeVisitorStack.pop();
                 stackTop = nodeVisitorStack.peek();
             }
@@ -185,7 +206,7 @@ public class AxmlReader {
                     nameIdx = input.readIntx();
                     input.skip(8); /* 00000008 00000000 */
                     name = stringItems.get(nameIdx).data;
-                    stackTop.visitText(lineNumber, name);
+                    stackTop.visitContentText(lineNumber, name);
                 }
                 break;
             default:
@@ -193,5 +214,7 @@ public class AxmlReader {
             }
             input.move(position + size);
         }
+
+        documentVisitor.visitEnd();
     }
 }

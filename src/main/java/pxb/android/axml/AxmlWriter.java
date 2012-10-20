@@ -15,18 +15,12 @@
  */
 package pxb.android.axml;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
-
 import com.googlecode.dex2jar.reader.io.DataOut;
 import com.googlecode.dex2jar.reader.io.LeDataOut;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * a class to write android axml
@@ -82,7 +76,7 @@ public class AxmlWriter extends AxmlVisitor {
         }
 
         @Override
-        public void visitAttr(String ns, String name, int resourceId, int type, Object value) {
+        public void visitContentAttr(String ns, String name, int resourceId, int type, Object value) {
             if (name == null) {
                 throw new RuntimeException("name can't be null");
             }
@@ -156,7 +150,7 @@ public class AxmlWriter extends AxmlVisitor {
         }
 
         @Override
-        public void visitText(int ln, String value) {
+        public void visitContentText(int ln, String value) {
             this.text = new StringItem(value);
             this.textLineNumber = ln;
         }

@@ -39,18 +39,18 @@ public class EnableDebugger {
                         return new NodeVisitor(super.visitChild(ns, name)) {
 
                             @Override
-                            public void visitAttr(String ns, String name, int resourceId, int type, Object obj) {
+                            public void visitContentAttr(String ns, String name, int resourceId, int type, Object obj) {
                                 if ("http://schemas.android.com/apk/res/android".equals(ns)
                                         && "debuggable".equals(name)) {
                                     return;
                                 }
-                                super.visitAttr(ns, name, resourceId, type, obj);
+                                super.visitContentAttr(ns, name, resourceId, type, obj);
                             }
 
                             @Override
                             public void visitEnd() {
                                 // android:debuggable(0x0101000f)=(type 0x12)0xffffffff
-                                super.visitAttr("http://schemas.android.com/apk/res/android", "debuggable", 0x0101000f,
+                                super.visitContentAttr("http://schemas.android.com/apk/res/android", "debuggable", 0x0101000f,
                                         0x12, 0xffffffff);
                                 super.visitEnd();
                             }

@@ -3,7 +3,6 @@ package pxb.android.axml.test;
 import com.googlecode.dex2jar.reader.io.ArrayDataIn;
 import org.junit.Test;
 import pxb.android.axml.AxmlReader;
-import pxb.android.axml.AxmlVisitor;
 import pxb.android.axml.AxmlWriter;
 import pxb.android.axml.DumpAdapter;
 
@@ -24,9 +23,10 @@ public class Test2 {
                 AxmlReader rd = new AxmlReader(ArrayDataIn.le(xml));
                 AxmlWriter wr = new AxmlWriter();
                 System.out.println("=== A ");
+                //rd.accept(new DumpAdapter());
                 rd.accept(new DumpAdapter(wr));
                 System.out.println("=== B ");
-                new AxmlReader(ArrayDataIn.le(wr.toByteArray())).accept(new DumpAdapter(new AxmlVisitor()));
+                new AxmlReader(ArrayDataIn.le(wr.toByteArray())).accept(new DumpAdapter());
             }
         }
     }
