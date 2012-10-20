@@ -1,13 +1,12 @@
 package pxb.android.axml.test;
 
-import java.io.IOException;
-
 import org.junit.Test;
-
 import pxb.android.axml.AxmlReader;
-import pxb.android.axml.AxmlVisitor.NodeVisitor;
 import pxb.android.axml.AxmlWriter;
 import pxb.android.axml.DumpAdapter;
+import pxb.android.axml.NodeVisitor;
+
+import java.io.IOException;
 
 public class Test4 {
     @Test
