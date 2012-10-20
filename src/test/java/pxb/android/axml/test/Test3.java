@@ -1,16 +1,14 @@
 package pxb.android.axml.test;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-
+import com.googlecode.dex2jar.reader.io.ArrayDataIn;
 import org.junit.Test;
-
 import pxb.android.axml.AxmlReader;
 import pxb.android.axml.AxmlVisitor;
 import pxb.android.axml.DumpAdapter;
 
-import com.googlecode.dex2jar.reader.io.ArrayDataIn;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
 public class Test3 {
     @Test
@@ -41,7 +39,7 @@ public class Test3 {
                 rd.accept(new AxmlVisitor(new DumpAdapter()) {
 
                     @Override
-                    public NodeVisitor first(String ns, String name) {
+                    public NodeVisitor visitFirst(String ns, String name) {
                         return null;
                     }
                 });
@@ -62,11 +60,11 @@ public class Test3 {
                 rd.accept(new AxmlVisitor(new DumpAdapter()) {
 
                     @Override
-                    public NodeVisitor first(String ns, String name) {
-                        return new NodeVisitor(super.first(ns, name)) {
+                    public NodeVisitor visitFirst(String ns, String name) {
+                        return new NodeVisitor(super.visitFirst(ns, name)) {
 
                             @Override
-                            public NodeVisitor child(String ns, String name) {
+                            public NodeVisitor visitChild(String ns, String name) {
                                 return null;
                             }
                         };

@@ -82,7 +82,7 @@ public class AxmlWriter extends AxmlVisitor {
         }
 
         @Override
-        public void attr(String ns, String name, int resourceId, int type, Object value) {
+        public void visitAttr(String ns, String name, int resourceId, int type, Object value) {
             if (name == null) {
                 throw new RuntimeException("name can't be null");
             }
@@ -92,18 +92,18 @@ public class AxmlWriter extends AxmlVisitor {
         }
 
         @Override
-        public NodeVisitor child(String ns, String name) {
+        public NodeVisitor visitChild(String ns, String name) {
             NodeImpl child = new NodeImpl(ns, name);
             this.children.add(child);
             return child;
         }
 
         @Override
-        public void end() {
+        public void visitEnd() {
         }
 
         @Override
-        public void line(int ln) {
+        public void visitLine(int ln) {
             this.line = ln;
         }
 
@@ -156,7 +156,7 @@ public class AxmlWriter extends AxmlVisitor {
         }
 
         @Override
-        public void text(int ln, String value) {
+        public void visitText(int ln, String value) {
             this.text = new StringItem(value);
             this.textLineNumber = ln;
         }
@@ -245,18 +245,18 @@ public class AxmlWriter extends AxmlVisitor {
     // private List<StringItem> styleItems = new ArrayList();
 
     @Override
-    public void end() {
+    public void visitEnd() {
     }
 
     @Override
-    public NodeVisitor first(String ns, String name) {
+    public NodeVisitor visitFirst(String ns, String name) {
         NodeImpl first = new NodeImpl(ns, name);
         this.firsts.add(first);
         return first;
     }
 
     @Override
-    public void ns(String prefix, String uri, int ln) {
+    public void visitNamespace(String prefix, String uri, int ln) {
         nses.put(uri, new Ns(new StringItem(prefix), new StringItem(uri), ln));
     }
 

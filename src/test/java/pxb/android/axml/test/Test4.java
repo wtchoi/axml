@@ -13,11 +13,11 @@ public class Test4 {
     @Test
     public void test() throws IOException {
         AxmlWriter aw = new AxmlWriter();
-        NodeVisitor nv = aw.first("http://abc.com", "abc");
-        nv.end();
-        nv = aw.first("http://efg.com", "efg");
-        nv.end();
-        aw.end();
+        NodeVisitor nv = aw.visitFirst("http://abc.com", "abc");
+        nv.visitEnd();
+        nv = aw.visitFirst("http://efg.com", "efg");
+        nv.visitEnd();
+        aw.visitEnd();
         AxmlReader ar = new AxmlReader(aw.toByteArray());
         ar.accept(new DumpAdapter());
     }

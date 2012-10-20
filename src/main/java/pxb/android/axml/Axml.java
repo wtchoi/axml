@@ -27,7 +27,7 @@ public class Axml extends AxmlVisitor {
             public Object value;
 
             public void accept(NodeVisitor nodeVisitor) {
-                nodeVisitor.attr(ns, name, resourceId, type, value);
+                nodeVisitor.visitAttr(ns, name, resourceId, type, value);
             }
         }
 
@@ -36,7 +36,7 @@ public class Axml extends AxmlVisitor {
             public String text;
 
             public void accept(NodeVisitor nodeVisitor) {
-                nodeVisitor.text(ln, text);
+                nodeVisitor.visitText(ln, text);
             }
         }
 
@@ -47,9 +47,9 @@ public class Axml extends AxmlVisitor {
         public Text text;
 
         public void accept(NodeVisitor nodeVisitor) {
-            NodeVisitor nodeVisitor2 = nodeVisitor.child(ns, name);
+            NodeVisitor nodeVisitor2 = nodeVisitor.visitChild(ns, name);
             acceptB(nodeVisitor2);
-            nodeVisitor2.end();
+            nodeVisitor2.visitEnd();
         }
 
         public void acceptB(NodeVisitor nodeVisitor) {
@@ -60,7 +60,7 @@ public class Axml extends AxmlVisitor {
                 a.accept(nodeVisitor);
             }
             if (ln != null) {
-                nodeVisitor.line(ln);
+                nodeVisitor.visitLine(ln);
             }
             for (Node c : children) {
                 c.accept(nodeVisitor);
@@ -68,7 +68,7 @@ public class Axml extends AxmlVisitor {
         }
 
         @Override
-        public void attr(String ns, String name, int resourceId, int type, Object obj) {
+        public void visitAttr(String ns, String name, int resourceId, int type, Object obj) {
             Attr attr = new Attr();
             attr.name = name;
             attr.ns = ns;
@@ -79,7 +79,7 @@ public class Axml extends AxmlVisitor {
         }
 
         @Override
-        public NodeVisitor child(String ns, String name) {
+        public NodeVisitor visitChild(String ns, String name) {
             Node node = new Node();
             node.name = name;
             node.ns = ns;
@@ -88,12 +88,12 @@ public class Axml extends AxmlVisitor {
         }
 
         @Override
-        public void line(int ln) {
+        public void visitLine(int ln) {
             this.ln = ln;
         }
 
         @Override
-        public void text(int lineNumber, String value) {
+        public void visitText(int lineNumber, String value) {
             Text text = new Text();
             text.ln = lineNumber;
             text.text = value;
@@ -106,7 +106,7 @@ public class Axml extends AxmlVisitor {
         public String prefix, uri;
 
         public void accept(AxmlVisitor visitor) {
-            visitor.ns(prefix, uri, ln);
+            visitor.visitNamespace(prefix, uri, ln);
         }
     }
 
@@ -121,15 +121,15 @@ public class Axml extends AxmlVisitor {
             first.accept(new NodeVisitor(null) {
 
                 @Override
-                public NodeVisitor child(String ns, String name) {
-                    return visitor.first(ns, name);
+                public NodeVisitor visitChild(String ns, String name) {
+                    return visitor.visitFirst(ns, name);
                 }
             });
         }
     }
 
     @Override
-    public NodeVisitor first(String ns, String name) {
+    public NodeVisitor visitFirst(String ns, String name) {
         Node node = new Node();
         node.name = name;
         node.ns = ns;
@@ -138,7 +138,7 @@ public class Axml extends AxmlVisitor {
     }
 
     @Override
-    public void ns(String prefix, String uri, int ln) {
+    public void visitNamespace(String prefix, String uri, int ln) {
         Ns ns = new Ns();
         ns.prefix = prefix;
         ns.uri = uri;

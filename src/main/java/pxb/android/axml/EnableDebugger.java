@@ -31,28 +31,28 @@ public class EnableDebugger {
         rd.accept(new AxmlVisitor(wr) {
 
             @Override
-            public NodeVisitor first(String ns, String name) {// manifest
-                return new NodeVisitor(super.first(ns, name)) {
+            public NodeVisitor visitFirst(String ns, String name) {// manifest
+                return new NodeVisitor(super.visitFirst(ns, name)) {
 
                     @Override
-                    public NodeVisitor child(String ns, String name) {// application
-                        return new NodeVisitor(super.child(ns, name)) {
+                    public NodeVisitor visitChild(String ns, String name) {// application
+                        return new NodeVisitor(super.visitChild(ns, name)) {
 
                             @Override
-                            public void attr(String ns, String name, int resourceId, int type, Object obj) {
+                            public void visitAttr(String ns, String name, int resourceId, int type, Object obj) {
                                 if ("http://schemas.android.com/apk/res/android".equals(ns)
                                         && "debuggable".equals(name)) {
                                     return;
                                 }
-                                super.attr(ns, name, resourceId, type, obj);
+                                super.visitAttr(ns, name, resourceId, type, obj);
                             }
 
                             @Override
-                            public void end() {
+                            public void visitEnd() {
                                 // android:debuggable(0x0101000f)=(type 0x12)0xffffffff
-                                super.attr("http://schemas.android.com/apk/res/android", "debuggable", 0x0101000f,
+                                super.visitAttr("http://schemas.android.com/apk/res/android", "debuggable", 0x0101000f,
                                         0x12, 0xffffffff);
-                                super.end();
+                                super.visitEnd();
                             }
                         };
                     }

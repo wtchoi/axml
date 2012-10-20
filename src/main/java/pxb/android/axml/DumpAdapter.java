@@ -49,7 +49,7 @@ public class DumpAdapter extends AxmlVisitor {
         }
 
         @Override
-        public void attr(String ns, String name, int resourceId, int type, Object obj) {
+        public void visitAttr(String ns, String name, int resourceId, int type, Object obj) {
             for (int i = 0; i < deep; i++) {
                 System.out.print("  ");
             }
@@ -68,11 +68,11 @@ public class DumpAdapter extends AxmlVisitor {
                 System.out.print(String.format("=[%08x]%08x", type, obj));
             }
             System.out.println();
-            super.attr(ns, name, resourceId, type, obj);
+            super.visitAttr(ns, name, resourceId, type, obj);
         }
 
         @Override
-        public NodeVisitor child(String ns, String name) {
+        public NodeVisitor visitChild(String ns, String name) {
             for (int i = 0; i < deep; i++) {
                 System.out.print("  ");
             }
@@ -81,7 +81,7 @@ public class DumpAdapter extends AxmlVisitor {
                 System.out.println(getPrefix(ns) + ":");
             }
             System.out.println(name);
-            NodeVisitor nv = super.child(ns, name);
+            NodeVisitor nv = super.visitChild(ns, name);
             if (nv != null) {
                 return new DumpNodeAdapter(nv, deep + 1, nses);
             }
@@ -99,12 +99,12 @@ public class DumpAdapter extends AxmlVisitor {
         }
 
         @Override
-        public void text(int ln, String value) {
+        public void visitText(int ln, String value) {
             for (int i = 0; i < deep + 1; i++) {
                 System.out.print("  ");
             }
             System.out.println(value);
-            super.text(ln, value);
+            super.visitText(ln, value);
         }
     }
 
@@ -118,18 +118,18 @@ public class DumpAdapter extends AxmlVisitor {
     }
 
     @Override
-    public void end() {
-        super.end();
+    public void visitEnd() {
+        super.visitEnd();
     }
 
     @Override
-    public NodeVisitor first(String ns, String name) {
+    public NodeVisitor visitFirst(String ns, String name) {
         System.out.print("<");
         if (ns != null) {
             System.out.println(nses.get(ns) + ":");
         }
         System.out.println(name);
-        NodeVisitor nv = super.first(ns, name);
+        NodeVisitor nv = super.visitFirst(ns, name);
         if (nv != null) {
             DumpNodeAdapter x = new DumpNodeAdapter(nv, 1, nses);
             return x;
@@ -138,10 +138,10 @@ public class DumpAdapter extends AxmlVisitor {
     }
 
     @Override
-    public void ns(String prefix, String uri, int ln) {
+    public void visitNamespace(String prefix, String uri, int ln) {
         System.out.println(prefix + "=" + uri);
         this.nses.put(uri, prefix);
-        super.ns(prefix, uri, ln);
+        super.visitNamespace(prefix, uri, ln);
     }
 
 }

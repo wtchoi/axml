@@ -15,18 +15,17 @@
  */
 package pxb.android.axml;
 
-import static pxb.android.axml.AxmlVisitor.TYPE_INT_BOOLEAN;
-import static pxb.android.axml.AxmlVisitor.TYPE_STRING;
+import com.googlecode.dex2jar.reader.io.ArrayDataIn;
+import com.googlecode.dex2jar.reader.io.DataIn;
+import pxb.android.axml.AxmlVisitor.NodeVisitor;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import pxb.android.axml.AxmlVisitor.NodeVisitor;
-
-import com.googlecode.dex2jar.reader.io.ArrayDataIn;
-import com.googlecode.dex2jar.reader.io.DataIn;
+import static pxb.android.axml.AxmlVisitor.TYPE_INT_BOOLEAN;
+import static pxb.android.axml.AxmlVisitor.TYPE_STRING;
 
 /**
  * a class to read android axml
@@ -46,12 +45,12 @@ public class AxmlReader {
     public static final NodeVisitor EMPTY_VISITOR = new NodeVisitor() {
 
         @Override
-        public NodeVisitor child(String ns, String name) {
+        public NodeVisitor visitChild(String namespace, String name) {
             return EMPTY_VISITOR;
         }
     };
     static final int UTF8_FLAG = 0x00000100;
-    private DataIn in;
+    private DataIn input;
     private List<Integer> resourceIds = new ArrayList<Integer>();
     private StringItems stringItems = new StringItems();
 
@@ -59,75 +58,75 @@ public class AxmlReader {
         this(ArrayDataIn.le(data));
     }
 
-    public AxmlReader(DataIn in) {
+    public AxmlReader(DataIn input) {
         super();
-        this.in = in;
+        this.input = input;
     }
 
     public void accept(final AxmlVisitor documentVisitor) throws IOException {
-        DataIn in = this.in;
+        DataIn input = this.input;
         int fileSize;
         {
-            int type = in.readIntx();
+            int type = input.readIntx();
             if (type != CHUNK_AXML_FILE) {
                 throw new RuntimeException();
             }
-            fileSize = in.readIntx();
+            fileSize = input.readIntx();
         }
-        NodeVisitor root = documentVisitor == null ? EMPTY_VISITOR : new NodeVisitor() {
+        NodeVisitor rootVisitor = documentVisitor == null ? EMPTY_VISITOR : new NodeVisitor() {
             @Override
-            public NodeVisitor child(String ns, String name) {
-                return documentVisitor.first(ns, name);
+            public NodeVisitor visitChild(String namespace, String name) {
+                return documentVisitor.visitFirst(namespace, name);
             }
         };
 
-        NodeVisitor tos = root;
-        Stack<NodeVisitor> nvs = new Stack<NodeVisitor>();
-        nvs.push(root);
+        NodeVisitor stackTop = rootVisitor;
+        Stack<NodeVisitor> nodeVisitorStack = new Stack<NodeVisitor>();
+        nodeVisitorStack.push(rootVisitor);
 
-        String name, ns;
-        int nameIdx, nsIdx;
+        String name, namespace;
+        int nameIdx, namespaceIdx;
         int lineNumber;
 
-        for (int p = in.getCurrentPosition(); p < fileSize; p = in.getCurrentPosition()) {
-            int type = in.readIntx();
-            int size = in.readIntx();
+        for (int position = input.getCurrentPosition(); position < fileSize; position = input.getCurrentPosition()) {
+            int type = input.readIntx();
+            int size = input.readIntx();
             switch (type) {
             case CHUNK_XML_START_TAG: {
                 {
-                    lineNumber = in.readIntx();
-                    in.skip(4);/* 0xFFFFFFFF */
-                    nsIdx = in.readIntx();
-                    nameIdx = in.readIntx();
-                    int flag = in.readIntx();// 0x00140014 ?
+                    lineNumber = input.readIntx();
+                    input.skip(4);/* 0xFFFFFFFF */
+                    namespaceIdx = input.readIntx();
+                    nameIdx = input.readIntx();
+                    int flag = input.readIntx();// 0x00140014 ?
                     if (flag != 0x00140014) {
                         throw new RuntimeException();
                     }
                     name = stringItems.get(nameIdx).data;
-                    ns = nsIdx >= 0 ? stringItems.get(nsIdx).data : null;
+                    namespace = namespaceIdx >= 0 ? stringItems.get(namespaceIdx).data : null;
 
-                    tos = tos.child(ns, name);
-                    if (tos == null) {
-                        tos = EMPTY_VISITOR;
+                    stackTop = stackTop.visitChild(namespace, name);
+                    if (stackTop == null) {
+                        stackTop = EMPTY_VISITOR;
                     }
-                    nvs.push(tos);
-                    tos.line(lineNumber);
+                    nodeVisitorStack.push(stackTop);
+                    stackTop.visitLine(lineNumber);
                 }
 
-                int attributeCount = in.readUShortx();
-                // int idAttribute = in.readUShortx();
-                // int classAttribute = in.readUShortx();
-                // int styleAttribute = in.readUShortx();
-                in.skip(6);
-                if (tos != EMPTY_VISITOR) {
+                int attributeCount = input.readUShortx();
+                // int idAttribute = input.readUShortx();
+                // int classAttribute = input.readUShortx();
+                // int styleAttribute = input.readUShortx();
+                input.skip(6);
+                if (stackTop != EMPTY_VISITOR) {
                     for (int i = 0; i < attributeCount; i++) {
-                        nsIdx = in.readIntx();
-                        nameIdx = in.readIntx();
-                        in.skip(4);// skip valueString
-                        int aValueType = in.readIntx() >>> 24;
-                        int aValue = in.readIntx();
+                        namespaceIdx = input.readIntx();
+                        nameIdx = input.readIntx();
+                        input.skip(4);// skip valueString
+                        int aValueType = input.readIntx() >>> 24;
+                        int aValue = input.readIntx();
                         name = stringItems.get(nameIdx).data;
-                        ns = nsIdx >= 0 ? stringItems.get(nsIdx).data : null;
+                        namespace = namespaceIdx >= 0 ? stringItems.get(namespaceIdx).data : null;
                         Object value = null;
                         switch (aValueType) {
                         case TYPE_STRING:
@@ -140,59 +139,59 @@ public class AxmlReader {
                             value = aValue;
                         }
                         int resourceId = nameIdx < resourceIds.size() ? resourceIds.get(nameIdx) : -1;
-                        tos.attr(ns, name, resourceId, aValueType, value);
+                        stackTop.visitAttr(namespace, name, resourceId, aValueType, value);
                     }
                 } else {
-                    in.skip(5 * 4);
+                    input.skip(5 * 4);
                 }
             }
                 break;
             case CHUNK_XML_END_TAG: {
-                in.skip(size - 8);
-                tos.end();
-                nvs.pop();
-                tos = nvs.peek();
+                input.skip(size - 8);
+                stackTop.visitEnd();
+                nodeVisitorStack.pop();
+                stackTop = nodeVisitorStack.peek();
             }
                 break;
             case CHUNK_XML_START_NAMESPACE:
                 if (documentVisitor == null) {
-                    in.skip(4 * 4);
+                    input.skip(4 * 4);
                 } else {
-                    lineNumber = in.readIntx();
-                    in.skip(4);/* 0xFFFFFFFF */
-                    int prefixIdx = in.readIntx();
-                    nsIdx = in.readIntx();
-                    documentVisitor.ns(stringItems.get(prefixIdx).data, stringItems.get(nsIdx).data, lineNumber);
+                    lineNumber = input.readIntx();
+                    input.skip(4);/* 0xFFFFFFFF */
+                    int prefixIdx = input.readIntx();
+                    namespaceIdx = input.readIntx();
+                    documentVisitor.visitNamespace(stringItems.get(prefixIdx).data, stringItems.get(namespaceIdx).data, lineNumber);
                 }
                 break;
             case CHUNK_XML_END_NAMESPACE:
-                in.skip(size - 8);
+                input.skip(size - 8);
                 break;
             case CHUNK_STRINGS:
-                stringItems.read(in, size);
+                stringItems.read(input, size);
                 break;
             case CHUNK_RESOURCEIDS:
                 int count = size / 4 - 2;
                 for (int i = 0; i < count; i++) {
-                    resourceIds.add(in.readIntx());
+                    resourceIds.add(input.readIntx());
                 }
                 break;
             case CHUNK_XML_TEXT:
-                if (tos == EMPTY_VISITOR) {
-                    in.skip(20);
+                if (stackTop == EMPTY_VISITOR) {
+                    input.skip(20);
                 } else {
-                    lineNumber = in.readIntx();
-                    in.skip(4);/* 0xFFFFFFFF */
-                    nameIdx = in.readIntx();
-                    in.skip(8); /* 00000008 00000000 */
+                    lineNumber = input.readIntx();
+                    input.skip(4);/* 0xFFFFFFFF */
+                    nameIdx = input.readIntx();
+                    input.skip(8); /* 00000008 00000000 */
                     name = stringItems.get(nameIdx).data;
-                    tos.text(lineNumber, name);
+                    stackTop.visitText(lineNumber, name);
                 }
                 break;
             default:
                 throw new RuntimeException();
             }
-            in.move(p + size);
+            input.move(position + size);
         }
     }
 }

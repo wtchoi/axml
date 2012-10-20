@@ -46,9 +46,9 @@ public class AxmlVisitor {
          * @param obj
          *            a string for {@link AxmlVisitor#TYPE_STRING} ,and Integer for others
          */
-        public void attr(String ns, String name, int resourceId, int type, Object obj) {
+        public void visitAttr(String ns, String name, int resourceId, int type, Object obj) {
             if (nv != null) {
-                nv.attr(ns, name, resourceId, type, obj);
+                nv.visitAttr(ns, name, resourceId, type, obj);
             }
         }
 
@@ -59,9 +59,9 @@ public class AxmlVisitor {
          * @param name
          * @return
          */
-        public NodeVisitor child(String ns, String name) {
+        public NodeVisitor visitChild(String ns, String name) {
             if (nv != null) {
-                return nv.child(ns, name);
+                return nv.visitChild(ns, name);
             }
             return null;
         }
@@ -69,9 +69,9 @@ public class AxmlVisitor {
         /**
          * end the visit
          */
-        public void end() {
+        public void visitEnd() {
             if (nv != null) {
-                nv.end();
+                nv.visitEnd();
             }
         }
 
@@ -80,9 +80,9 @@ public class AxmlVisitor {
          * 
          * @param ln
          */
-        public void line(int ln) {
+        public void visitLine(int ln) {
             if (nv != null) {
-                nv.line(ln);
+                nv.visitLine(ln);
             }
         }
 
@@ -91,9 +91,9 @@ public class AxmlVisitor {
          * 
          * @param value
          */
-        public void text(int lineNumber, String value) {
+        public void visitText(int lineNumber, String value) {
             if (nv != null) {
-                nv.text(lineNumber, value);
+                nv.visitText(lineNumber, value);
             }
         }
     }
@@ -119,9 +119,9 @@ public class AxmlVisitor {
     /**
      * end the visit
      */
-    public void end() {
+    public void visitEnd() {
         if (av != null) {
-            av.end();
+            av.visitEnd();
         }
     };
 
@@ -132,9 +132,9 @@ public class AxmlVisitor {
      * @param name
      * @return
      */
-    public NodeVisitor first(String ns, String name) {
+    public NodeVisitor visitFirst(String ns, String name) {
         if (av != null) {
-            return av.first(ns, name);
+            return av.visitFirst(ns, name);
         }
         return null;
     }
@@ -146,9 +146,9 @@ public class AxmlVisitor {
      * @param uri
      * @param ln
      */
-    public void ns(String prefix, String uri, int ln) {
+    public void visitNamespace(String prefix, String uri, int ln) {
         if (av != null) {
-            av.ns(prefix, uri, ln);
+            av.visitNamespace(prefix, uri, ln);
         }
     }
 
