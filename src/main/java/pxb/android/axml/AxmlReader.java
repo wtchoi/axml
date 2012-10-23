@@ -19,6 +19,7 @@ import com.googlecode.dex2jar.reader.io.ArrayDataIn;
 import com.googlecode.dex2jar.reader.io.DataIn;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -60,6 +61,20 @@ public class AxmlReader {
     public AxmlReader(DataIn input) {
         super();
         this.input = input;
+    }
+
+    public static AxmlReader create(InputStream is){
+        try{
+            int available = is.available();
+            byte[] buffer = new byte[available];
+
+            int len = is.read(buffer);
+            if(len == available){
+                return new AxmlReader(buffer);
+            }
+        }
+        catch(Exception e){}
+        return null;
     }
 
     public void accept(final AxmlVisitor documentVisitor) throws IOException {

@@ -20,6 +20,7 @@ import com.googlecode.dex2jar.reader.io.LeDataOut;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.*;
 
 /**
@@ -286,9 +287,7 @@ public class AxmlWriter extends AxmlVisitor {
         return size;
     }
 
-    public byte[] toByteArray() throws IOException {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-
+    public void writeTo(OutputStream os) throws IOException{
         DataOut out = new LeDataOut(os);
         int size = prepare();
         out.writeInt(AxmlReader.CHUNK_AXML_FILE);
@@ -335,6 +334,11 @@ public class AxmlWriter extends AxmlVisitor {
             out.writeInt(ns.prefix.index);
             out.writeInt(ns.uri.index);
         }
+    }
+
+    public byte[] toByteArray() throws IOException {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        this.writeTo(os);
         return os.toByteArray();
     }
 
